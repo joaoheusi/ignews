@@ -1,8 +1,12 @@
-import { GetServerSideProps } from "next";
+import { GetServerSideProps, GetStaticProps } from "next";
 import Head from "next/head";
 import { SubscribeButton } from "../components/SubscribeButton";
 import { stripe } from "../services/stripe";
 import styles from "./home.module.scss";
+
+// Client-side -- useEffect
+// Server-side rendering
+// Static Site generation
 
 interface HomeProps {
   product: {
@@ -12,7 +16,6 @@ interface HomeProps {
 }
 
 export default function Home({ product }: HomeProps) {
-
   return (
     <>
       <Head>
@@ -29,7 +32,7 @@ export default function Home({ product }: HomeProps) {
             Get access to all the publications <br />
             <span>for {product.amount}/month</span>
           </p>
-          <SubscribeButton priceId={product.priceId}/>
+          <SubscribeButton priceId={product.priceId} />
         </section>
         <img src="/images/avatar.svg" alt="" />
       </main>
@@ -37,7 +40,14 @@ export default function Home({ product }: HomeProps) {
   );
 }
 
-export const getServerSideProps: GetServerSideProps = async () => {
+// getServerSideProps - SSR
+// getStaticProps - SSG - salva html no next e da próxima
+// vez ele retorna o html estático já salvo
+// ------------------------------------------------------
+// somente usar SSG quando a mesma página(mesmas informações)
+// for ser exibida para todos os usuários
+
+export const getStaticProps: GetStaticProps = async () => {
   const price = await stripe.prices.retrieve("price_1KIPBcJ3RrkvoceXSgloqYAw");
 
   const product = {
@@ -51,5 +61,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
     props: {
       product,
     },
+    revalidate: 60 * 60 * 24, // 24hours - quanto tempo o conteúdo da página deve ficar salvo?
+    // revalidate somente para getStaticProps
   };
 };
